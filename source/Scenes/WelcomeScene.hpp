@@ -1,12 +1,4 @@
-/*
- * MainScene.hpp
- *
- *  Created on: Dec 13, 2025
- *      Author: Timur
- */
-
-#ifndef INC_GAME_BATTLESHIP_MAIN_SCENE_HPP_
-#define INC_GAME_BATTLESHIP_MAIN_SCENE_HPP_
+#pragma once
 
 #include <SceneManager/ISceneManager.hpp>
 #include <GamesSupport/BaseGame.hpp>
@@ -23,30 +15,24 @@
 #include <UI/Animation/CartoonAnimation.hpp>
 #include <Data/Point2.hpp>
 
-#include <array>
+#include <UI/Geometry/UI_Circle.hpp>
 
-// Сцена с приветствием
+
+// Сцена с игрой
 class WelcomeScene final : public IScene
 {
 protected:
     Timer welcome_timer;
     uint8_t welcome_part{};
+    UI_Circle welcome_circle;
 
 public:
     WelcomeScene(ISceneManager* game);
 
-    // Пользовательский ввод в игру
-    virtual bool ProcessInput(const AppEvent& event) override;
-
     void Loop() override;
-    void LoadLevel();
-
-    bool IsValidMatrix(int y, int x);
 
     // Игровая отрисовка
     virtual void Draw(IScreen& screen) override;
 
     SCENE_NO_ARGS_BUILDER(WelcomeScene)
 };
-
-#endif

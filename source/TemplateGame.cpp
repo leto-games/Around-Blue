@@ -6,13 +6,12 @@ TemplateGame::TemplateGame(const AppBinHeader& header) : BaseGame{ header }
 {
 }
 
-//#include "Scenes/MainScene.hpp"
-//#include "Scenes/PrepareScene.hpp"
-//#include "Scenes/GameScene.hpp"
 #include "Scenes/SceneID.hpp"
 
 #include "Scenes/WelcomeScene.hpp"
-//#include "Scenes/TestScene.hpp"
+#include "Scenes/MainScene.hpp"
+#include "Scenes/LevelsScene.hpp"
+#include "Scenes/GameScene.hpp"
 
 //#include "Data/GameData.hpp"
 //#include "Bitmaps/Bitmaps.hpp"
@@ -34,8 +33,10 @@ bool TemplateGame::CustomInit()
 	DrawFunctions::SetDefaultFont(IFont::FromHandle(leto_api_v1->Font->GetFont(8, 8, 0)));
 
 	AddSceneBuilder<WelcomeScene>(TemplateGame_Scene::WELCOME);
-	//AddSceneBuilder<MainScene>(Battleship_Scene::MAIN);
-
+	AddSceneBuilder<MainScene>(TemplateGame_Scene::MAIN);
+	// AddSceneBuilder<LevelsScene>(TemplateGame_Scene::LEVELS);
+	AddSceneBuilder<GameScene>(TemplateGame_Scene::GAME);
+	
 	SwitchScene((uint8_t) TemplateGame_Scene::WELCOME);
 	return true;
 }
