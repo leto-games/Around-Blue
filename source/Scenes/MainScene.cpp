@@ -45,7 +45,6 @@ bool MainScene::ProcessInput(const AppEvent& event){
             case 2:
                 GameInstance->Close();
                 break;
-            return true;
         }
     }
     return false;

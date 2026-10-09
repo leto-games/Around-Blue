@@ -61,7 +61,6 @@ bool LevelsScene::ProcessInput(const AppEvent& event){
         GameScene::SetLevelID((selectedLevel[1]-1)*7+selectedLevel[0]+currentPage*LEVELS_MAX_X*LEVELS_MAX_Y);
 
         scene_manager->SwitchScene((uint8_t) TemplateGame_Scene::GAME);
-        // (selectedLevel[1]-1)*7+selectedLevel[0]+currentPage*LEVELS_MAX_X*LEVELS_MAX_Y // порядковый номер уровня
         return true;
     }
     return false;
