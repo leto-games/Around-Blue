@@ -1,2 +1,2 @@
-# game-template
-Template game for the LETO gaming console
+# Around Blue
+First logical game for the LETO gaming console
