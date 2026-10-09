@@ -34,7 +34,7 @@ bool TemplateGame::CustomInit()
 
 	AddSceneBuilder<WelcomeScene>(TemplateGame_Scene::WELCOME);
 	AddSceneBuilder<MainScene>(TemplateGame_Scene::MAIN);
-	// AddSceneBuilder<LevelsScene>(TemplateGame_Scene::LEVELS);
+	AddSceneBuilder<LevelsScene>(TemplateGame_Scene::LEVELS);
 	AddSceneBuilder<GameScene>(TemplateGame_Scene::GAME);
 	
 	SwitchScene((uint8_t) TemplateGame_Scene::WELCOME);

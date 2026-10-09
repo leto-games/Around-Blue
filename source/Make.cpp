@@ -73,8 +73,8 @@ LetoApplication_V1 LETO_EXECUTABLE_INFO_VAR_NAME
 		LETO_EXECUTABLE_TYPE_GAME,
 		1,
 		0xFFFF,
-		"TemplateGame",
-		"Шаблонная игра"
+		"AroundBlue",
+		"СиняяЗалупка"
 	},
 	&Init,
 	&Clean,

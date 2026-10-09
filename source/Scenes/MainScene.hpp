@@ -26,6 +26,8 @@ protected:
 public:
     MainScene(ISceneManager* game);
     
+    virtual bool ProcessInput(const AppEvent& event) override;
+    
     void Loop() override;
 
     // Игровая отрисовка

@@ -10,38 +10,88 @@
 
 using namespace std;
 
-constexpr int cellCountX = 11;
-constexpr int cellCountY = 8;
+int GameScene::level_id = -1;
 
-array<array<int, cellCountX>, cellCountY> matrix{};
+void GameScene::SetLevelID(int level_id)
+{
+    GameScene::level_id = level_id;
+}
 
-static bool isLevelFinished = false;
-static bool isLevelFailed = false;
+level_t GameScene::GetLevelByID(int level_id)
+{
+    level_t level_data{};
 
-static array<unsigned, 2> cellSelected = {4,5};
+    StaticText<128> path;
+    if (!leto_api_v1->Globals->GetAppDir(path.CharPtr(), path.Capacity()))
+        return level_data;
+
+	path += "levels";
+    path += "\\level";
+    path += to_text(level_id);
+    path += ".txt";
+	//info_size = leto_api_v1->File->Scan(app_path, info, 128);
+
+	LetoFile_V1* file = leto_api_v1->File->Open(path, LFM_V1_NONE);
+    if (!file)
+        return level_data;
+
+	int32_t res = leto_api_v1->File->Read(file, level_data.level, sizeof(level_data.level));
+	leto_api_v1->File->Close(file);
+
+    return level_data;
+
+	// // }
+	// LetoFile_V1* file2 = leto_api_v1->File->Open(app_path + "\\level1.txt", LFM_V1_WRITE);
+
+	// file_info[1] = '1';
+	// int32_t r4 = leto_api_v1->File->Write(file2, file_info.CharPtr(), r3);
+
+	// int8_t r5 = leto_api_v1->File->Flush(file2);
+}
+
+#include <Input/SystemInputID.hpp>
 
 GameScene::GameScene(ISceneManager* game) : IScene{game}
 {
-    LoadLevel();
+    LoadLevel(GetLevelByID(level_id));
 }
 
-void GameScene::LoadLevel(){
-    matrix[4][5] = 1;
-    matrix[4][4] = 2;
-    matrix[4][6] = 2;
-    matrix[3][4] = 3;
-    matrix[3][6] = 3;
+void GameScene::LoadLevel(const level_t& level){
+    isLevelFinished = false;
+    isLevelFailed = false;
+    isActionToExit = false;
+    cellSelected = {4,5};
+
+    bool isEmpty = true;
+
+    for (int y = 0; y < cellCountY; y++){
+        for (int x = 0; x < cellCountX; x++){
+            char symbol = level.level[y*(cellCountX+1)+x];
+            if (symbol) isEmpty = false;
+            matrix[y][x] = symbol;
+        }
+    }
+
+    if (isEmpty) scene_manager->SwitchScene(TemplateGame_Scene::MAIN);
 }
 
 bool GameScene::ProcessInput(const AppEvent& event)
 {
     if (IsSystemRightEvent(event)){
+        if (isLevelFinished || isLevelFailed){
+            isActionToExit = !isActionToExit;
+            return true;
+        }
         if (cellSelected[1] < cellCountX-1){
             cellSelected = array<unsigned, 2>{cellSelected[0], cellSelected[1] + 1};
             return true;
         }
     }
     if (IsSystemLeftEvent(event)){
+        if (isLevelFinished || isLevelFailed){
+            isActionToExit = !isActionToExit;
+            return true;
+        }
         if (cellSelected[1] > 0){
             cellSelected = array<unsigned, 2>{cellSelected[0], cellSelected[1] - 1};
             return true;
@@ -61,80 +111,110 @@ bool GameScene::ProcessInput(const AppEvent& event)
     }
 
     if (IsSystemAltEvent(event)){
-        isLevelFinished = false;
-        isLevelFailed = false;
         cellSelected = {4,5};
-        LoadLevel();
+        LoadLevel(GetLevelByID(level_id));
         return true;
     }
     if (IsSystemEnterEvent(event)){
+        if (isLevelFinished){
+            if (!isActionToExit){
+                GameScene::SetLevelID(level_id + 1);
+                LoadLevel(GetLevelByID(level_id));
+            }
+            else 
+                scene_manager->SwitchScene(TemplateGame_Scene::MAIN);
+            return true;
+        }
+        else if (isLevelFailed){
+             if (!isActionToExit){
+                LoadLevel(GetLevelByID(level_id));
+             }
+             else
+                scene_manager->SwitchScene(TemplateGame_Scene::MAIN);
+            return true;
+        }
+
         // проверка нажатия голубой клетки
-        if (matrix[cellSelected[0]][cellSelected[1]] == 1){
-            matrix[cellSelected[0]][cellSelected[1]] = 0; // при нажатии на голубой, сделать его черным
+        if (matrix[cellSelected[0]][cellSelected[1]] == '1'){
+            matrix[cellSelected[0]][cellSelected[1]] = '0'; // при нажатии на голубой, сделать его черным
+
+            //////////// СИНИЙ ////////////
+            if (IsValidMatrix(cellSelected[0], cellSelected[1]-1) && matrix[cellSelected[0]][cellSelected[1]-1] == '1'){
+                matrix[cellSelected[0]][cellSelected[1]-1] = '3'; // синий слева от нажатого голубого, сделать его зелёным
+            }
+            if (IsValidMatrix(cellSelected[0], cellSelected[1]+1) && matrix[cellSelected[0]][cellSelected[1]+1] == '1'){
+                matrix[cellSelected[0]][cellSelected[1]+1] = '3'; // синий слева от нажатого голубого, сделать его зелёным
+            }
+            if (IsValidMatrix(cellSelected[0]-1, cellSelected[1]) && matrix[cellSelected[0]-1][cellSelected[1]] == '1'){
+                matrix[cellSelected[0]-1][cellSelected[1]] = '3'; // синий слева от нажатого голубого, сделать его зелёным
+            }
+            if (IsValidMatrix(cellSelected[0]+1, cellSelected[1]) && matrix[cellSelected[0]+1][cellSelected[1]] == '1'){
+                matrix[cellSelected[0]+1][cellSelected[1]] = '3'; // синий слева от нажатого голубого, сделать его зелёным
+            }
 
             //////////// КРАСНЫЙ ////////////
-            if (IsValidMatrix(cellSelected[0], cellSelected[1]-1) && matrix[cellSelected[0]][cellSelected[1]-1] == 2){
-                matrix[cellSelected[0]][cellSelected[1]-1] = 1; // красный слева от нажатого голубого, сделать его голубым
+            if (IsValidMatrix(cellSelected[0], cellSelected[1]-1) && matrix[cellSelected[0]][cellSelected[1]-1] == '2'){
+                matrix[cellSelected[0]][cellSelected[1]-1] = '1'; // красный слева от нажатого голубого, сделать его голубым
             }
 
-            if (IsValidMatrix(cellSelected[0], cellSelected[1]+1) && matrix[cellSelected[0]][cellSelected[1]+1] == 2){
-                matrix[cellSelected[0]][cellSelected[1]+1] = 1; // красный справа от нажатого голубого, сделать его голубым
+            if (IsValidMatrix(cellSelected[0], cellSelected[1]+1) && matrix[cellSelected[0]][cellSelected[1]+1] == '2'){
+                matrix[cellSelected[0]][cellSelected[1]+1] = '1'; // красный справа от нажатого голубого, сделать его голубым
             }
 
-            if (IsValidMatrix(cellSelected[0]-1, cellSelected[1]) && matrix[cellSelected[0]-1][cellSelected[1]] == 2){
-                matrix[cellSelected[0]-1][cellSelected[1]] = 1; // красный сверху от нажатого голубого, сделать его голубым
+            if (IsValidMatrix(cellSelected[0]-1, cellSelected[1]) && matrix[cellSelected[0]-1][cellSelected[1]] == '2'){
+                matrix[cellSelected[0]-1][cellSelected[1]] = '1'; // красный сверху от нажатого голубого, сделать его голубым
             }
 
-            if (IsValidMatrix(cellSelected[0]+1, cellSelected[1]) && matrix[cellSelected[0]+1][cellSelected[1]] == 2){
-                matrix[cellSelected[0]+1][cellSelected[1]] = 1; // красный снизу от нажатого голубого, сделать его голубым
+            if (IsValidMatrix(cellSelected[0]+1, cellSelected[1]) && matrix[cellSelected[0]+1][cellSelected[1]] == '2'){
+                matrix[cellSelected[0]+1][cellSelected[1]] = '1'; // красный снизу от нажатого голубого, сделать его голубым
             }
 
             //////////// ЗЕЛЁНЫЙ ////////////
-            if (IsValidMatrix(cellSelected[0]-1, cellSelected[1]-1) && matrix[cellSelected[0]-1][cellSelected[1]-1] == 3){
-                matrix[cellSelected[0]-1][cellSelected[1]-1] = 2; // зелёный слева сверху от нажатого голубого, сделать его красным
+            if (IsValidMatrix(cellSelected[0]-1, cellSelected[1]-1) && matrix[cellSelected[0]-1][cellSelected[1]-1] == '3'){
+                matrix[cellSelected[0]-1][cellSelected[1]-1] = '2'; // зелёный слева сверху от нажатого голубого, сделать его красным
             }
 
-            if (IsValidMatrix(cellSelected[0]-1, cellSelected[1]+1) && matrix[cellSelected[0]-1][cellSelected[1]+1] == 3){
-                matrix[cellSelected[0]-1][cellSelected[1]+1] = 2; // зелёный справа сверху от нажатого голубого, сделать его красным
+            if (IsValidMatrix(cellSelected[0]-1, cellSelected[1]+1) && matrix[cellSelected[0]-1][cellSelected[1]+1] == '3'){
+                matrix[cellSelected[0]-1][cellSelected[1]+1] = '2'; // зелёный справа сверху от нажатого голубого, сделать его красным
             }
 
-            if (IsValidMatrix(cellSelected[0]+1, cellSelected[1]-1) && matrix[cellSelected[0]+1][cellSelected[1]-1] == 3){
-                matrix[cellSelected[0]+1][cellSelected[1]-1] = 2; // зелёный слева снизу от нажатого голубого, сделать его красным
+            if (IsValidMatrix(cellSelected[0]+1, cellSelected[1]-1) && matrix[cellSelected[0]+1][cellSelected[1]-1] == '3'){
+                matrix[cellSelected[0]+1][cellSelected[1]-1] = '2'; // зелёный слева снизу от нажатого голубого, сделать его красным
             }
 
-            if (IsValidMatrix(cellSelected[0]+1, cellSelected[1]+1) && matrix[cellSelected[0]+1][cellSelected[1]+1] == 3){
-                matrix[cellSelected[0]+1][cellSelected[1]+1] = 2; // зелёный справа снизу от нажатого голубого, сделать его красным
+            if (IsValidMatrix(cellSelected[0]+1, cellSelected[1]+1) && matrix[cellSelected[0]+1][cellSelected[1]+1] == '3'){
+                matrix[cellSelected[0]+1][cellSelected[1]+1] = '2'; // зелёный справа снизу от нажатого голубого, сделать его красным
             }
 
             //////////// БЕЛЫЙ ////////////
             //////////// ЖЁЛТЫЙ ////////////
             //////////// КОРИЧНЕВЫЙ ////////////
-            if (IsValidMatrix(cellSelected[0], cellSelected[1]-1) && matrix[cellSelected[0]][cellSelected[1]-1] == 6){
+            if (IsValidMatrix(cellSelected[0], cellSelected[1]-1) && matrix[cellSelected[0]][cellSelected[1]-1] == '6'){
                 if (IsValidMatrix(cellSelected[0], cellSelected[1]-2))
                     matrix[cellSelected[0]][cellSelected[1]-1] = matrix[cellSelected[0]][cellSelected[1]-2]; // коричневый слева от нажатого голубого, сделать его
                 else
-                    matrix[cellSelected[0]][cellSelected[1]-1] = 0;
+                    matrix[cellSelected[0]][cellSelected[1]-1] = '0';
             }
 
-            if (IsValidMatrix(cellSelected[0], cellSelected[1]+1) && matrix[cellSelected[0]][cellSelected[1]+1] == 6){
+            if (IsValidMatrix(cellSelected[0], cellSelected[1]+1) && matrix[cellSelected[0]][cellSelected[1]+1] == '6'){
                 if (IsValidMatrix(cellSelected[0], cellSelected[1]+2))
                     matrix[cellSelected[0]][cellSelected[1]+1] = matrix[cellSelected[0]][cellSelected[1]+2]; // коричневый справа от нажатого голубого, сделать его
                 else
-                    matrix[cellSelected[0]][cellSelected[1]+1] = 0;
+                    matrix[cellSelected[0]][cellSelected[1]+1] = '0';
             }
 
-            if (IsValidMatrix(cellSelected[0]-1, cellSelected[1]) && matrix[cellSelected[0]-1][cellSelected[1]] == 6){
+            if (IsValidMatrix(cellSelected[0]-1, cellSelected[1]) && matrix[cellSelected[0]-1][cellSelected[1]] == '6'){
                 if (IsValidMatrix(cellSelected[0]-2, cellSelected[1]))
                     matrix[cellSelected[0]-1][cellSelected[1]] = matrix[cellSelected[0]-2][cellSelected[1]]; // коричневый сверху от нажатого голубого, сделать его
                 else
-                    matrix[cellSelected[0]-1][cellSelected[1]] = 0;
+                    matrix[cellSelected[0]-1][cellSelected[1]] = '0';
             }
 
-            if (IsValidMatrix(cellSelected[0]+1, cellSelected[1]) && matrix[cellSelected[0]+1][cellSelected[1]] == 6){
+            if (IsValidMatrix(cellSelected[0]+1, cellSelected[1]) && matrix[cellSelected[0]+1][cellSelected[1]] == '6'){
                 if (IsValidMatrix(cellSelected[0]+2, cellSelected[1]))
                     matrix[cellSelected[0]+1][cellSelected[1]] = matrix[cellSelected[0]+2][cellSelected[1]]; // коричневый снизу от нажатого голубого, сделать его
                 else
-                    matrix[cellSelected[0]+1][cellSelected[1]] = 0;
+                    matrix[cellSelected[0]+1][cellSelected[1]] = '0';
             }
             //////////// СЕРЫЙ ////////////
 
@@ -144,8 +224,8 @@ bool GameScene::ProcessInput(const AppEvent& event)
 
             for (const auto& row : matrix) {
                 for (int val : row) {
-                    if (val != 0 && val != 4) {
-                        if (val == 1)
+                    if (val != '0' && val != '4') {
+                        if (val == '1')
                             isContainsBlue = true;
                         else
                             isContainsOther = true;
@@ -165,7 +245,7 @@ bool GameScene::ProcessInput(const AppEvent& event)
 }
 
 void GameScene::Loop(){
-
+    
 }
 
 void GameScene::Draw(IScreen& screen)
@@ -180,12 +260,34 @@ void GameScene::Draw(IScreen& screen)
 
     if (isLevelFailed){
         DrawFunctions::DrawOutlinedRectangle(screen, {30,30}, {130,98}, BlackColor, WhiteColor);
-        DrawFunctions::DrawText(screen, { (displaySizeX-42)/2, displaySizeY/2 }, "Провал", RedColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawText(screen, { (displaySizeX-42)/2, displaySizeY/2-10 }, "Провал", RedColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawText(screen, { (displaySizeX-35)/2-25, displaySizeY/2+20 }, "Выйти", WhiteColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawText(screen, { (displaySizeX-35)/2+25+2, displaySizeY/2+20 }, "Снова", WhiteColor, BlackColor, false, IFont::FromHandle(font));
+
+        if (!isActionToExit){
+            DrawFunctions::DrawLine(screen, {(displaySizeX-35)/2-25-2, displaySizeY/2+20}, {(displaySizeX-35)/2+10, displaySizeY/2+27}, RedColor);
+            DrawFunctions::DrawLine(screen, {(displaySizeX-35)/2-25-2, displaySizeY/2+27}, {(displaySizeX-35)/2+10, displaySizeY/2+20}, RedColor);
+        }
+        else{
+            DrawFunctions::DrawLine(screen, {(displaySizeX-35)/2+25+2, displaySizeY/2+20}, {(displaySizeX-35)/2+60+2, displaySizeY/2+27}, RedColor);
+            DrawFunctions::DrawLine(screen, {(displaySizeX-35)/2+25+2, displaySizeY/2+27}, {(displaySizeX-35)/2+60+2, displaySizeY/2+20}, RedColor);
+        }
         return;
     }
     else if (isLevelFinished){
         DrawFunctions::DrawOutlinedRectangle(screen, {30,30}, {130,98}, BlackColor, WhiteColor);
-        DrawFunctions::DrawText(screen, { (displaySizeX-49)/2, displaySizeY/2 }, "Победа!", GreenColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawText(screen, { (displaySizeX-42)/2, displaySizeY/2-10}, "Победа", GreenColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawText(screen, { (displaySizeX-35)/2-25, displaySizeY/2+20 }, "Выйти", WhiteColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawText(screen, { (displaySizeX-35)/2+25+2, displaySizeY/2+20 }, "Далее", WhiteColor, BlackColor, false, IFont::FromHandle(font));
+
+        if (!isActionToExit){
+            DrawFunctions::DrawLine(screen, {(displaySizeX-35)/2-25-2, displaySizeY/2+20}, {(displaySizeX-35)/2+10, displaySizeY/2+27}, RedColor);
+            DrawFunctions::DrawLine(screen, {(displaySizeX-35)/2-25-2, displaySizeY/2+27}, {(displaySizeX-35)/2+10, displaySizeY/2+20}, RedColor);
+        }
+        else{
+            DrawFunctions::DrawLine(screen, {(displaySizeX-35)/2+25+2, displaySizeY/2+20}, {(displaySizeX-35)/2+60+2, displaySizeY/2+27}, RedColor);
+            DrawFunctions::DrawLine(screen, {(displaySizeX-35)/2+25+2, displaySizeY/2+27}, {(displaySizeX-35)/2+60+2, displaySizeY/2+20}, RedColor);
+        }
         return;
     }
 
@@ -195,46 +297,51 @@ void GameScene::Draw(IScreen& screen)
             p2 = {x*cellSize+(displaySizeX-cellCountX*cellSize)/2+cellSize, y*cellSize+(displaySizeY-cellCountY*cellSize)/2+cellSize};
 
             RGBColor outlineColor = BlackColor;
-            if (cellSelected == array<unsigned, 2>{(unsigned int)y,(unsigned int)x})
-                outlineColor = WhiteColor;
 
             switch (matrix[y][x])
             {
-                case 0:
+                case '0':
                     DrawFunctions::DrawOutlinedRectangle(screen, p1, p2, BlackColor, outlineColor);
                     break;
-                case 1:
+                case '1':
                     DrawFunctions::DrawOutlinedRectangle(screen, p1, p2, BlueColor, outlineColor);
                     break;
-                case 2:
+                case '2':
                     DrawFunctions::DrawOutlinedRectangle(screen, p1, p2, RedColor, outlineColor);
                     break;
-                case 3:
+                case '3':
                     DrawFunctions::DrawOutlinedRectangle(screen, p1, p2, GreenColor, outlineColor);
                     break;
-                case 4:
+                case '4':
                     DrawFunctions::DrawOutlinedRectangle(screen, p1, p2, WhiteColor, outlineColor);
                     break;
-                case 5:
+                case '5':
                     DrawFunctions::DrawOutlinedRectangle(screen, p1, p2, YellowColor, outlineColor);
                     break;
-                case 6:
+                case '6':
                     DrawFunctions::DrawOutlinedRectangle(screen, p1, p2, BrownColor, outlineColor);
                     break;
-                case 7:
+                case '7':
                     DrawFunctions::DrawOutlinedRectangle(screen, p1, p2, GrayColor, outlineColor);
                     break;
-                case 8:
+                case '8':
                     DrawFunctions::DrawOutlinedRectangle(screen, p1, p2, aBlueColor, outlineColor);
                     break;
             }
         }
     }
 
-    string coord = "(" + to_string(cellSelected[0]) + ", " + to_string(cellSelected[1]) + ")";
-    string type = to_string(matrix[cellSelected[0]][cellSelected[1]]);
-    DrawFunctions::DrawText(screen, { 50,0 }, coord.c_str(), coord.length(), WhiteColor, PurpleColor, false, IFont::FromHandle(font));
-    DrawFunctions::DrawText(screen, { 25,0 }, type.c_str(), type.length(), WhiteColor, PurpleColor, false, IFont::FromHandle(font));
+    leto_api_v1->Graphics->DrawRect(IScreen::ToHandle(&screen), 3+cellSelected[1]*14, 8+cellSelected[0]*14, 15, 15, 1, WhiteColor);
+
+    // string coord = "(" + to_string(cellSelected[0]) + ", " + to_string(cellSelected[1]) + ")";
+    // string type = to_string(matrix[cellSelected[0]][cellSelected[1]]);
+    // DrawFunctions::DrawText(screen, { 50,0 }, coord.c_str(), coord.length(), WhiteColor, PurpleColor, false, IFont::FromHandle(font));
+    // DrawFunctions::DrawText(screen, { 25,0 }, type.c_str(), type.length(), WhiteColor, PurpleColor, false, IFont::FromHandle(font));
+
+    string level = "Level: " + to_string(GameScene::level_id);
+
+    static const LetoFont_V1* levelFont = leto_api_v1->Font->GetFont(7, 7, 1);
+    DrawFunctions::DrawText(screen, { 10,0 }, level.c_str(), level.length(), WhiteColor, BlackColor, false, IFont::FromHandle(levelFont));
 }
 
 bool GameScene::IsValidMatrix(int y, int x) {

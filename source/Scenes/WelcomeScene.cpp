@@ -4,18 +4,16 @@
 #include <LetoAPI_V1/LetoAPI_V1.h>
 #include <DrawFunctions/DrawRectangle.hpp>
 
-
-
-int displaySizeX = 160;
-int displaySizeY = 128;
+#include <string>
+using namespace std;
 
 WelcomeScene::WelcomeScene(ISceneManager* game) : IScene{game}
 {
-    WelcomeScene::welcome_timer.Start(3000);
+    welcome_timer.Start(2000);
 }
 
 void WelcomeScene::Loop(){
-    if (WelcomeScene::welcome_timer.Expired()){
+    if (welcome_timer.Expired()){
         scene_manager->SwitchScene((uint8_t) TemplateGame_Scene::MAIN);
     }
 }
@@ -26,8 +24,24 @@ void WelcomeScene::Draw(IScreen& screen)
 
     int displaySizeX = screen.Width(); // 160
     int displaySizeY = screen.Height(); // 128
-    
-    DrawFunctions::DrawOutlinedRectangle(screen, {displaySizeX/2-30,displaySizeY/2-30}, {displaySizeX/2,displaySizeY/2}, BlueColor, BlackColor);
-    DrawFunctions::DrawOutlinedRectangle(screen, {displaySizeX/2-30,displaySizeY/2}, {displaySizeX/2,displaySizeY/2+30}, RedColor, BlackColor);
-    DrawFunctions::DrawOutlinedRectangle(screen, {displaySizeX/2,displaySizeY/2}, {displaySizeX/2+30,displaySizeY/2+30}, GreenColor, BlackColor);
+
+    float timerCount = welcome_timer.GetProgress();
+    // string text = to_string(timerCount);
+
+    if (timerCount >= 1){
+
+    }
+    else if (timerCount > 0.65){
+        DrawFunctions::DrawOutlinedRectangle(screen, {displaySizeX/2,displaySizeY/2}, {displaySizeX/2+30,displaySizeY/2+30}, BlueColor, BlackColor);
+    }
+    else if (timerCount > 0.35){
+        DrawFunctions::DrawOutlinedRectangle(screen, {displaySizeX/2-30,displaySizeY/2}, {displaySizeX/2,displaySizeY/2+30}, BlueColor, BlackColor);
+        DrawFunctions::DrawOutlinedRectangle(screen, {displaySizeX/2,displaySizeY/2}, {displaySizeX/2+30,displaySizeY/2+30}, RedColor, BlackColor);
+    }
+    else if (timerCount > 0.0){
+        DrawFunctions::DrawOutlinedRectangle(screen, {displaySizeX/2-30,displaySizeY/2-30}, {displaySizeX/2,displaySizeY/2}, BlueColor, BlackColor);
+        DrawFunctions::DrawOutlinedRectangle(screen, {displaySizeX/2-30,displaySizeY/2}, {displaySizeX/2,displaySizeY/2+30}, RedColor, BlackColor);
+        DrawFunctions::DrawOutlinedRectangle(screen, {displaySizeX/2,displaySizeY/2}, {displaySizeX/2+30,displaySizeY/2+30}, GreenColor, BlackColor);
+    }
+    // DrawFunctions::DrawText(screen, {40,0}, text.c_str(), text.length(), WhiteColor, PurpleColor, false, IFont::FromHandle(font));
 }
