@@ -4,7 +4,6 @@
 #include <LetoAPI_V1/LetoAPI_V1.h>
 #include <DrawFunctions/DrawRectangle.hpp>
 
-#include <string>
 #include <array>
 
 #include "GameScene.hpp"
@@ -76,8 +75,8 @@ void LevelsScene::Draw(IScreen& screen)
 
     for (int i = 0; i < LEVELS_MAX_Y; i++){
         for (int j = 0; j < LEVELS_MAX_X; j++){
-            string level = to_string(levelNumber);
-            DrawFunctions::DrawText(screen, {20*j+10, 20*i+10}, level.c_str(), level.length());
+            StaticText32 level = to_text(levelNumber);
+            DrawFunctions::DrawText(screen, {20*j+10, 20*i+10}, level.ConstChar(), level.TextLength());
             levelNumber++;
         }
     }

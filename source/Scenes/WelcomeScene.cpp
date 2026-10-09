@@ -4,7 +4,6 @@
 #include <LetoAPI_V1/LetoAPI_V1.h>
 #include <DrawFunctions/DrawRectangle.hpp>
 
-#include <string>
 using namespace std;
 
 WelcomeScene::WelcomeScene(ISceneManager* game) : IScene{game}

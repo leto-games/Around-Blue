@@ -5,7 +5,6 @@
 #include <DrawFunctions/DrawRectangle.hpp>
 #include "../TemplateGame.hpp"
 
-#include <string>
 #include <array>
 
 using namespace std;
@@ -58,12 +57,12 @@ void MainScene::Draw(IScreen& screen)
     int displaySizeY = screen.Height(); // 128
 
 
-    array<string, 3> menu = {"Уровни",
+    array<StaticText32, 3> menu = {"Уровни",
                              "Настройки",
                              "Выход"};
 
     for (int i = 0; i < menu.size(); i++){
-        DrawFunctions::DrawText(screen, {displaySizeX/2-static_cast<int>(menu[i].length()*1.75f), displaySizeY/2+15+i*15}, menu[i].c_str(), menu[i].length(), WhiteColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawText(screen, {displaySizeX/2-static_cast<int>(menu[i].TextLength()*1.75f), displaySizeY/2+15+i*15}, menu[i].ConstChar(), menu[i].TextLength(), WhiteColor, BlackColor, false, IFont::FromHandle(font));
     }
 
     DrawFunctions::DrawText(screen, {displaySizeX/2-45, displaySizeY/2+15+selectedButton*15}, ">", WhiteColor, BlackColor, false, IFont::FromHandle(font));

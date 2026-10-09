@@ -5,7 +5,6 @@
 #include <DrawFunctions/DrawRectangle.hpp>
 
 #include <array>
-#include <string>
 #include <ranges>
 
 using namespace std;
@@ -338,10 +337,11 @@ void GameScene::Draw(IScreen& screen)
     // DrawFunctions::DrawText(screen, { 50,0 }, coord.c_str(), coord.length(), WhiteColor, PurpleColor, false, IFont::FromHandle(font));
     // DrawFunctions::DrawText(screen, { 25,0 }, type.c_str(), type.length(), WhiteColor, PurpleColor, false, IFont::FromHandle(font));
 
-    string level = "Level: " + to_string(GameScene::level_id);
+    StaticText32 level = "Level: ";
+    level += to_text(GameScene::level_id);
 
     static const LetoFont_V1* levelFont = leto_api_v1->Font->GetFont(7, 7, 1);
-    DrawFunctions::DrawText(screen, { 10,0 }, level.c_str(), level.length(), WhiteColor, BlackColor, false, IFont::FromHandle(levelFont));
+    DrawFunctions::DrawText(screen, { 10,0 }, level.ConstChar(), level.TextLength(), WhiteColor, BlackColor, false, IFont::FromHandle(levelFont));
 }
 
 bool GameScene::IsValidMatrix(int y, int x) {
