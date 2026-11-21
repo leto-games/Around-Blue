@@ -259,9 +259,9 @@ void GameScene::Draw(IScreen& screen)
 
     if (isLevelFailed){
         DrawFunctions::DrawOutlinedRectangle(screen, {30,30}, {130,98}, BlackColor, WhiteColor);
-        DrawFunctions::DrawText(screen, { (displaySizeX-42)/2, displaySizeY/2-10 }, "Провал", RedColor, BlackColor, false, IFont::FromHandle(font));
-        DrawFunctions::DrawText(screen, { (displaySizeX-35)/2-25, displaySizeY/2+20 }, "Выйти", WhiteColor, BlackColor, false, IFont::FromHandle(font));
-        DrawFunctions::DrawText(screen, { (displaySizeX-35)/2+25+2, displaySizeY/2+20 }, "Снова", WhiteColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawString(screen, { (displaySizeX-42)/2, displaySizeY/2-10 }, "Провал", RedColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawString(screen, { (displaySizeX-35)/2-25, displaySizeY/2+20 }, "Выйти", WhiteColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawString(screen, { (displaySizeX-35)/2+25+2, displaySizeY/2+20 }, "Снова", WhiteColor, BlackColor, false, IFont::FromHandle(font));
 
         if (!isActionToExit){
             DrawFunctions::DrawLine(screen, {(displaySizeX-35)/2-25-2, displaySizeY/2+20}, {(displaySizeX-35)/2+10, displaySizeY/2+27}, RedColor);
@@ -275,9 +275,9 @@ void GameScene::Draw(IScreen& screen)
     }
     else if (isLevelFinished){
         DrawFunctions::DrawOutlinedRectangle(screen, {30,30}, {130,98}, BlackColor, WhiteColor);
-        DrawFunctions::DrawText(screen, { (displaySizeX-42)/2, displaySizeY/2-10}, "Победа", GreenColor, BlackColor, false, IFont::FromHandle(font));
-        DrawFunctions::DrawText(screen, { (displaySizeX-35)/2-25, displaySizeY/2+20 }, "Выйти", WhiteColor, BlackColor, false, IFont::FromHandle(font));
-        DrawFunctions::DrawText(screen, { (displaySizeX-35)/2+25+2, displaySizeY/2+20 }, "Далее", WhiteColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawString(screen, { (displaySizeX-42)/2, displaySizeY/2-10}, "Победа", GreenColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawString(screen, { (displaySizeX-35)/2-25, displaySizeY/2+20 }, "Выйти", WhiteColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawString(screen, { (displaySizeX-35)/2+25+2, displaySizeY/2+20 }, "Далее", WhiteColor, BlackColor, false, IFont::FromHandle(font));
 
         if (!isActionToExit){
             DrawFunctions::DrawLine(screen, {(displaySizeX-35)/2-25-2, displaySizeY/2+20}, {(displaySizeX-35)/2+10, displaySizeY/2+27}, RedColor);
@@ -334,14 +334,14 @@ void GameScene::Draw(IScreen& screen)
 
     // string coord = "(" + to_string(cellSelected[0]) + ", " + to_string(cellSelected[1]) + ")";
     // string type = to_string(matrix[cellSelected[0]][cellSelected[1]]);
-    // DrawFunctions::DrawText(screen, { 50,0 }, coord.c_str(), coord.length(), WhiteColor, PurpleColor, false, IFont::FromHandle(font));
-    // DrawFunctions::DrawText(screen, { 25,0 }, type.c_str(), type.length(), WhiteColor, PurpleColor, false, IFont::FromHandle(font));
+    // DrawFunctions::DrawString(screen, { 50,0 }, coord.c_str(), coord.length(), WhiteColor, PurpleColor, false, IFont::FromHandle(font));
+    // DrawFunctions::DrawString(screen, { 25,0 }, type.c_str(), type.length(), WhiteColor, PurpleColor, false, IFont::FromHandle(font));
 
     StaticText32 level = "Level: ";
     level += to_text(GameScene::level_id);
 
     static const LetoFont_V1* levelFont = leto_api_v1->Font->GetFont(7, 7, 1);
-    DrawFunctions::DrawText(screen, { 10,0 }, level.ConstChar(), level.TextLength(), WhiteColor, BlackColor, false, IFont::FromHandle(levelFont));
+    DrawFunctions::DrawString(screen, { 10,0 }, level.ConstChar(), level.TextLength(), WhiteColor, BlackColor, false, IFont::FromHandle(levelFont));
 }
 
 bool GameScene::IsValidMatrix(int y, int x) {
