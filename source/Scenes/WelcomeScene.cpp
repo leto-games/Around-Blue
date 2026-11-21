@@ -42,5 +42,5 @@ void WelcomeScene::Draw(IScreen& screen)
         DrawFunctions::DrawOutlinedRectangle(screen, {displaySizeX/2-30,displaySizeY/2}, {displaySizeX/2,displaySizeY/2+30}, RedColor, BlackColor);
         DrawFunctions::DrawOutlinedRectangle(screen, {displaySizeX/2,displaySizeY/2}, {displaySizeX/2+30,displaySizeY/2+30}, GreenColor, BlackColor);
     }
-    // DrawFunctions::DrawText(screen, {40,0}, text.c_str(), text.length(), WhiteColor, PurpleColor, false, IFont::FromHandle(font));
+    // DrawFunctions::DrawString(screen, {40,0}, text.c_str(), text.length(), WhiteColor, PurpleColor, false, IFont::FromHandle(font));
 }

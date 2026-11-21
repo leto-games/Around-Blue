@@ -76,7 +76,7 @@ void LevelsScene::Draw(IScreen& screen)
     for (int i = 0; i < LEVELS_MAX_Y; i++){
         for (int j = 0; j < LEVELS_MAX_X; j++){
             StaticText32 level = to_text(levelNumber);
-            DrawFunctions::DrawText(screen, {20*j+10, 20*i+10}, level.ConstChar(), level.TextLength());
+            DrawFunctions::DrawString(screen, {20*j+10, 20*i+10}, level.ConstChar(), level.TextLength());
             levelNumber++;
         }
     }

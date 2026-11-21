@@ -62,8 +62,8 @@ void MainScene::Draw(IScreen& screen)
                              "Выход"};
 
     for (int i = 0; i < menu.size(); i++){
-        DrawFunctions::DrawText(screen, {displaySizeX/2-static_cast<int>(menu[i].TextLength()*1.75f), displaySizeY/2+15+i*15}, menu[i].ConstChar(), menu[i].TextLength(), WhiteColor, BlackColor, false, IFont::FromHandle(font));
+        DrawFunctions::DrawString(screen, {displaySizeX/2-static_cast<int>(menu[i].TextLength()*1.75f), displaySizeY/2+15+i*15}, menu[i].ConstChar(), menu[i].TextLength(), WhiteColor, BlackColor, false, IFont::FromHandle(font));
     }
 
-    DrawFunctions::DrawText(screen, {displaySizeX/2-45, displaySizeY/2+15+selectedButton*15}, ">", WhiteColor, BlackColor, false, IFont::FromHandle(font));
+    DrawFunctions::DrawString(screen, {displaySizeX/2-45, displaySizeY/2+15+selectedButton*15}, ">", WhiteColor, BlackColor, false, IFont::FromHandle(font));
 }
