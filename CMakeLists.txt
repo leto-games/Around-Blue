@@ -22,7 +22,7 @@ if("${PRESET_DEFINE_MACRO}" STREQUAL "__STM32__")
 else()
 	project("AroundBlue" C CXX)
 	add_library("${PROJECT_NAME}" SHARED "${C_CPP_COURCES}")
-	if(DEFINED ENV{LETO_PATH})
+	if(WIN32 AND DEFINED ENV{LETO_PATH})
 		target_compile_definitions(${PROJECT_NAME} PRIVATE LETOCORE_SHARED)
 	endif()
 endif()
@@ -95,7 +95,6 @@ elseif (${PRESET_DEFINE_MACRO} STREQUAL "__TERMUX__")
 	#add_library("${PROJECT_NAME}" SHARED "${CPP_COURCES}")
 
 	#target_link_libraries("${PROJECT_NAME}" PRIVATE STM32F4_Libraries)
-	set_target_properties("${PROJECT_NAME}" PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 endif ()
 
